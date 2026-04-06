@@ -1,0 +1,1 @@
+Primeiros exercicios que fiz do programação descomplicada.
