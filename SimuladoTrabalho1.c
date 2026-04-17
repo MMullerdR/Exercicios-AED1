@@ -1,4 +1,5 @@
 //Miguel Muller da Rosa
+#include <stdbool.h>
 
 bool lemonadeChange(int* bills, int billsSize) {
     int val_5 = 0, val_10 = 0, val_20 = 0;
