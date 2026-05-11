@@ -3,254 +3,255 @@
 #include <string.h>
 
 #define tamRascunho 50 // quantidade de caracteres maximo que pode ser lido
-#define quantInts 6 // numero de variaveis int necessarias
+#define quantInts 7 // numero de variaveis int necessarias
 
-int main( void ) {
+int main ( void ) {
 
-	// ----------------------------- declaração do buffer -----------------------------
-	void *pbuffer = malloc( sizeof( int ) * quantInts + sizeof( char ) * tamRascunho );
+    // ----------------------------- buffer único -----------------------------
+    void *pbuffer = malloc ( sizeof ( int ) * quantInts + tamRascunho );
 
-	if ( pbuffer == NULL ) {
-		printf( "Erro de memoria\n" );
-		free( pbuffer );
-		return 1;
-	}
+    if ( pbuffer == NULL ) {
+        printf ( "Erro de memoria\n" );
+        return 1;
+    }
 
-	// ----------------------------- declaração das variaveis necessárias -----------------------------
-	*( int * )pbuffer = 0;
+    // ----------------------------- controle interno dentro do buffer -----------------------------
+    int *opcao = ( int * ) pbuffer;
+    int *peopleAdded = opcao + 1;
+    int *count = opcao + 2;
+    int *bufferEnd = opcao + 3;
+    int *startOfAgenda = opcao + 4;
+    int *temp = opcao + 5;
 
-	int *peopleAdded = ( int * )pbuffer + 1;
-	*peopleAdded = 0;
+    char *rascunho = ( char * ) ( opcao + quantInts );
 
-	int *count = peopleAdded + 1;
-	*count = 0;
+    // inicialização
+    *opcao = 0;
+    *peopleAdded = 0;
+    *count = 0;
+    *temp = 0;
 
-	int *bufferEnd = count + 1;
-	*bufferEnd = ( sizeof( int ) * quantInts + sizeof( char ) * tamRascunho );
+    *startOfAgenda = sizeof ( int ) * quantInts + tamRascunho;
+    *bufferEnd = *startOfAgenda;
 
-	int *startOfAgenda = bufferEnd + 1;
-	*startOfAgenda = ( sizeof( int ) * quantInts + sizeof( char ) * tamRascunho );
+	printf( "--------------- Agenda Buffer ---------------" );
 
-	int *tamPalavra = startOfAgenda + 1;
-	*tamPalavra = 0;
-
-	// ----------------------------- repeticao do menu -----------------------------
-	while ( *( int * )pbuffer != 5 ) {
+    // ----------------------------- loop principal -----------------------------
+    while ( *opcao != 5 ) {
 
 		printf( "\nDigite opcao:\n" );
-		printf( "1- Adicionar Pessoa (Nome, Idade, email)\n2- Remover Pessoa\n3- Buscar Pessoa\n4- Listar todos\n5- Sair:\n" );
+        printf ( "\n1- Adicionar\n2- Remover\n3- Buscar\n4- Listar\n5- Sair\n" );
+        scanf ( "%d", opcao );
+        getchar ();
 
-		scanf( "%d", &( *( int * )pbuffer ) );
-		getchar();
+        switch ( *opcao ) {
+
+        // ============================================================
+        case 1: {
 
-		switch ( *( int * )pbuffer ) {
+            // ----------------------------- NOME -----------------------------
+            printf ( "Nome:\n" );
+            scanf ( "%49[^\n]", rascunho ); // armazena no rascunho
+            getchar ();
+
+            *temp = strlen ( rascunho ) + 1;
 
-			case 1: // -----------------------------------------------------------------------------------------
+            pbuffer = realloc ( pbuffer, *bufferEnd + *temp );
+            if ( pbuffer == NULL ) {
+                return 1;
+            }
 
-				// ----------------------------- add name -----------------------------
-				printf( "Digite nome (maximo de %d caracteres):\n", tamRascunho );
-				scanf( "%49[^\n]", ( char * )pbuffer + sizeof( int ) * quantInts ); // armazena no rascunho
-				getchar();
+            // atualiza os ponteiros apos realloc
+            opcao = ( int * ) pbuffer;
+            peopleAdded = opcao + 1;
+            count = opcao + 2;
+            bufferEnd = opcao + 3;
+            startOfAgenda = opcao + 4;
+            temp = opcao + 5;
+            rascunho = ( char * ) ( opcao + quantInts );
 
-				*tamPalavra = strlen( ( char * )pbuffer + sizeof( int ) * quantInts );
-				pbuffer = realloc( pbuffer, *bufferEnd + ( *tamPalavra + 1 ) );
+            char *agenda = ( char * ) pbuffer + *bufferEnd;
 
-				if ( pbuffer == NULL ) {
-					printf( "Erro de memoria\n" );
-					free( pbuffer );
-					return 1;
-				}
+            strcpy ( agenda, rascunho );
+            agenda += *temp;
+            *bufferEnd += *temp;
+
+            // ----------------------------- IDADE -----------------------------
+            pbuffer = realloc ( pbuffer, *bufferEnd + sizeof ( int ) );
+            if ( pbuffer == NULL ) {
+                return 1;
+            }
+
+            // atualiza os ponteiros apos realloc
+            opcao = ( int * ) pbuffer;
+            peopleAdded = opcao + 1;
+            count = opcao + 2;
+            bufferEnd = opcao + 3;
+            startOfAgenda = opcao + 4;
+            temp = opcao + 5;
+            rascunho = ( char * ) ( opcao + quantInts );
 
-				// atualiza os ponteiros apos realloc
-				peopleAdded = ( int * )pbuffer + 1;
-				count = peopleAdded + 1;
-				bufferEnd = count + 1;
-				startOfAgenda = bufferEnd + 1;
-				tamPalavra = startOfAgenda + 1;
+            agenda = ( char * ) pbuffer + *bufferEnd;
 
-				strcpy( ( char * )pbuffer + *bufferEnd, ( char * )pbuffer + sizeof( int ) * quantInts );
-				*bufferEnd = *bufferEnd + ( *tamPalavra + 1 );
+            printf ( "Idade:\n" );
+            scanf ( "%d", ( int * ) agenda ); // armazena no rascunho
+            getchar ();
 
-				// ----------------------------- add age -----------------------------
-				pbuffer = realloc( pbuffer, *bufferEnd + sizeof( int ) );
+            agenda += sizeof ( int );
+            *bufferEnd += sizeof ( int );
 
-				if ( pbuffer == NULL ) {
-					printf( "Erro de memoria\n" );
-					free( pbuffer );
-					return 1;
-				}
+            // ----------------------------- EMAIL -----------------------------
+            printf ( "Email:\n" );
+            scanf ( "%49[^\n]", rascunho ); // armazena no rascunho
+            getchar ();
 
-				// atualiza os ponteiros apos realloc
-				peopleAdded = ( int * )pbuffer + 1;
-				count = peopleAdded + 1;
-				bufferEnd = count + 1;
-				startOfAgenda = bufferEnd + 1;
-				tamPalavra = startOfAgenda + 1;
+            *temp = strlen ( rascunho ) + 1;
 
-				printf( "Digite idade:\n" );
-				scanf( "%d", ( int * )( ( char * )pbuffer + *bufferEnd ) ); // armazena no rascunho
-				getchar();
+            pbuffer = realloc ( pbuffer, *bufferEnd + *temp );
+            if ( pbuffer == NULL ) {
+                return 1;
+            }
 
-				*bufferEnd = *bufferEnd + sizeof( int );
+            // atualiza os ponteiros apos realloc
+            opcao = ( int * ) pbuffer;
+            peopleAdded = opcao + 1;
+            count = opcao + 2;
+            bufferEnd = opcao + 3;
+            startOfAgenda = opcao + 4;
+            temp = opcao + 5;
+            rascunho = ( char * ) ( opcao + quantInts );
 
-				// ----------------------------- add email -----------------------------
-				printf( "Digite email (maximo de %d caracteres):\n", tamRascunho );
-				scanf( "%49[^\n]", ( char * )pbuffer + sizeof( int ) * quantInts ); // armazena no rascunho
-				getchar();
+            agenda = ( char * ) pbuffer + *bufferEnd;
 
-				*tamPalavra = strlen( ( char * )pbuffer + sizeof( int ) * quantInts );
-				pbuffer = realloc( pbuffer, *bufferEnd + ( *tamPalavra + 1 ) );
+            strcpy ( agenda, rascunho );
+            *bufferEnd += *temp;
 
-				if ( pbuffer == NULL ) {
-					printf( "Erro de memoria\n" );
-					free( pbuffer );
-					return 1;
-				}
+            ( *peopleAdded )++;
 
-				// atualiza os ponteiros apos realloc
-				peopleAdded = ( int * )pbuffer + 1;
-				count = peopleAdded + 1;
-				bufferEnd = count + 1;
-				startOfAgenda = bufferEnd + 1;
-				tamPalavra = startOfAgenda + 1;
+            break;
+        }
 
-				strcpy( ( char * )pbuffer + *bufferEnd, ( char * )pbuffer + sizeof( int ) * quantInts );
-				*bufferEnd = *bufferEnd + ( *tamPalavra + 1 );
+        // ============================================================
+        case 2: {
 
-				( *peopleAdded )++;
+            printf ( "Nome da pessoa que deseja remover:\n" );
+            scanf ( "%49[^\n]", rascunho ); // armazena no rascunho
+            getchar ();
 
-				break;
+            char *p = ( char * ) pbuffer + *startOfAgenda;
+            *count = 0;
 
-			case 2: // -----------------------------------------------------------------------------------------
+            while ( *count < *peopleAdded ) {
 
-				printf( "Digite nome para excluir:\n" );
-				scanf( "%49[^\n]", ( char * )pbuffer + sizeof( int ) * quantInts ); // armazena no rascunho
-				getchar();
+                char *nome = p;
+                char *idade = nome + strlen ( nome ) + 1;
+                char *email = idade + sizeof ( int );
 
-				char *find = ( char * )pbuffer + *startOfAgenda;
+                if ( strcmp ( rascunho, nome ) == 0 ) {
 
-				while ( *count < *peopleAdded ) {
+					printf ( "Informacoes da pessoa a ser removida:\n" );
+					printf ( "Nome: %s\n", nome );
+                    printf ( "Idade: %d\n", *( int * ) idade );
+                    printf ( "Email: %s\n", email );
 
-					if ( strcmp( ( char * )pbuffer + sizeof( int ) * quantInts, find ) == 0 ) {
+                    *temp = strlen ( nome ) + 1 + sizeof ( int ) + strlen ( email ) + 1;
+                    // numero de bytes de nome + idade + email da pessoa a ser apagada
 
-						printf( "Pessoa encontrada\n" );
-						printf( "Nome: %s\n", find );
+                    memmove ( p, p + *temp, // posicao destino, primeira posicao apos os dados da pessoa encontrada
+                        *bufferEnd - ( ( p - ( char * ) pbuffer ) + *temp ) ); // numero de bytes que precisarão ser deslocados
 
-						*tamPalavra = ( ( strlen( find ) + 1 ) + sizeof( int ) + ( strlen( find + strlen( find ) + 1 + sizeof( int ) ) + 1 ) );
+                    *bufferEnd -= *temp;
+                    ( *peopleAdded )--;
 
-						// numero de bytes de nome + idade + email da pessoa a ser apagada
-						memmove(
-							find, // posicao destino
-							find + ( strlen( find ) + 1 ) + sizeof( int ) + ( strlen( find + strlen( find ) + 1 + sizeof( int ) ) + 1 ),
-							// primeira posicao apos os dados da pessoa encontrada
-							*bufferEnd - ( find - ( char * )pbuffer + ( strlen( find ) + 1 ) + sizeof( int ) + ( strlen( find + strlen( find ) + 1 + sizeof( int ) ) + 1 ) )
-							// numero de bytes que precisarão ser deslocados
-						);
+                    pbuffer = realloc ( pbuffer, *bufferEnd );
+                    if ( pbuffer == NULL && *bufferEnd > 0 ) {
+                        return 1;
+                    }
 
-						// atualiza os ponteiros apos realloc
-						pbuffer = realloc( pbuffer, *bufferEnd - *tamPalavra );
+                    // atualiza os ponteiros apos realloc
+                    opcao = ( int * ) pbuffer;
+                    peopleAdded = opcao + 1;
+                    count = opcao + 2;
+                    bufferEnd = opcao + 3;
+                    startOfAgenda = opcao + 4;
+                    temp = opcao + 5;
+                    rascunho = ( char * ) ( opcao + quantInts );
 
-						if ( pbuffer == NULL ) {
-							printf( "Erro de memoria\n" );
-							free( pbuffer );
-							return 1;
-						}
+					printf ( "Pessoa removida com sucesso!\n" );
 
-						*bufferEnd = *bufferEnd - *tamPalavra;
+                    break;
+                }
 
-						peopleAdded = ( int * )pbuffer + 1;
-						count = peopleAdded + 1;
-						bufferEnd = count + 1;
-						startOfAgenda = bufferEnd + 1;
-						tamPalavra = startOfAgenda + 1;
+                p = email + strlen ( email ) + 1;
+                ( *count )++;
+            }
 
-						( *peopleAdded )--;
+            *count = 0;
+            break;
+        }
 
-						printf( "Pessoa excluida!\n" );
+        // ============================================================
+        case 3: {
 
-						break;
+            printf ( "Buscar nome:\n" );
+            scanf ( "%49[^\n]", rascunho ); // armazena no rascunho
+            getchar ();
 
-					} else {
+            char *p = ( char * ) pbuffer + *startOfAgenda;
+            *count = 0;
 
-						find = find + strlen( find ) + 1 + sizeof( int ); // tamanho do nome + int
-						find = find + strlen( find ) + 1; // tamanho do email
+            while ( *count < *peopleAdded ) {
 
-						( *count )++;
-					}
-				}
+                char *nome = p;
+                char *idade = nome + strlen ( nome ) + 1;
+                char *email = idade + sizeof ( int );
 
-				( *count ) = 0;
+                if ( strcmp ( rascunho, nome ) == 0 ) {
 
-				break;
+                    printf ( "Nome: %s\n", nome );
+                    printf ( "Idade: %d\n", *( int * ) idade );
+                    printf ( "Email: %s\n", email );
+                    break;
+                }
 
-			case 3: // -----------------------------------------------------------------------------------------
+                p = email + strlen ( email ) + 1;
+                ( *count )++;
+            }
 
-				printf( "Digite nome para procurar:\n" );
-				scanf( "%49[^\n]", ( char * )pbuffer + sizeof( int ) * quantInts ); // armazena no rascunho
-				getchar();
+            *count = 0;
+            break;
+        }
 
-				*tamPalavra = strlen( ( char * )pbuffer + sizeof( int ) * quantInts );
+        // ============================================================
+        case 4: {
 
-				find = ( char * )pbuffer + *startOfAgenda;
+            char *p = ( char * ) pbuffer + *startOfAgenda;
+            *count = 0;
 
-				while ( *count < *peopleAdded ) {
+			if ( *peopleAdded == 0 ) {
+				printf ( "Nenhuma pessoa adicionada.\n" );
+			}
+			
+            while ( *count < *peopleAdded ) {
 
-					if ( strcmp( ( char * )pbuffer + sizeof( int ) * quantInts, find ) == 0 ) {
+                char *nome = p;
+                char *idade = nome + strlen ( nome ) + 1;
+                char *email = idade + sizeof ( int );
 
-						printf( "Pessoa encontrada:\n" );
-						printf( "Nome: %s\n", find );
-						find = find + strlen( find ) + 1;
+                printf ( "Nome: %s\n", nome );
+                printf ( "Idade: %d\n", *( int * ) idade );
+                printf ( "Email: %s\n", email );
 
-						printf( "Idade: %d\n", *( ( int * )find ) );
-						find = find + sizeof( int );
+                p = email + strlen ( email ) + 1;
+                ( *count )++;
+            }
 
-						printf( "Email: %s\n\n", find );
-						find = find + strlen( find ) + 1;
+            *count = 0;
+            break;
+        }
+        }
+    }
 
-					} else {
-
-						find = find + strlen( find ) + 1 + sizeof( int ); // tamanho do nome + int
-						find = find + strlen( find ) + 1; // tamanho do email
-					}
-
-					( *count )++;
-				}
-
-				( *count ) = 0;
-
-				break;
-
-			case 4: // -----------------------------------------------------------------------------------------
-
-				char *aux = ( char * )pbuffer + *startOfAgenda;
-
-				printf( "Agenda:\n" );
-
-				if ( *peopleAdded == 0 ) {
-					printf( "Nenhuma pessoa adicionada!\n" );
-				}
-
-				while ( *count < *peopleAdded ) {
-
-					printf( "Nome: %s\n", aux );
-					aux = aux + strlen( aux ) + 1;
-
-					printf( "Idade: %d\n", *( ( int * )aux ) );
-					aux = aux + sizeof( int );
-
-					printf( "Email: %s\n\n", aux );
-					aux = aux + strlen( aux ) + 1;
-
-					( *count )++;
-				}
-
-				*count = 0;
-
-				break;
-		}
-	}
-
-	free( pbuffer );
-
-	return 0;
+    free ( pbuffer );
+    return 0;
 }
